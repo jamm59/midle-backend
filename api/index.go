@@ -1,33 +1,26 @@
 package handler
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strconv"
-
-	pusher "github.com/pusher/pusher-http-go/v5"
 )
 
-type requestBody struct {
-	Lang string `json:"lang"`
-	Data string `json:"data"`
-}
-type Response struct {
-	Message string
-}
+// type requestBody struct {
+// 	Lang string `json:"lang"`
+// 	Data string `json:"data"`
+// }
+// type Response struct {
+// 	Message string
+// }
  
 func Handler(w http.ResponseWriter, r *http.Request) {
 	// Set the Content-Type header to application/json
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	if r.Method == http.MethodGet {
-        // It's a Get request
-        fmt.Fprintf(w, "method not allowed")
-    }
+	// w.Header().Set("Content-Type", "application/json")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	// if r.Method == http.MethodGet {
+    //     // It's a Get request
+    //     fmt.Fprintf(w, "method not allowed")
+    // }
 	// Client := pusher.Client{
 	// 	AppID:   "1568045",
 	// 	Key:     "51f659ce3f43900892ff",
@@ -65,77 +58,77 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// for i := 0; i < len(strings.Split(codeFile, "\n"))-1; i++ {
 	// 	<-resultChan
 	// }
-	fmt.Fprintf(w, "<h3>data Recieved Successfully</h3>")
 	// response := Response{
-	// 	Message: "data Recieved Successfully",
+		// 	Message: "data Recieved Successfully",
 	// }
-
+	
 	// jsonResponse, err := json.Marshal(response)
 	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return 
-	// }
-
-
-	// Write the JSON data to the response
-	//w.Write(jsonResponse)
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return 
+		// }
+		
+		
+		// Write the JSON data to the response
+		//w.Write(jsonResponse)
+	fmt.Fprintf(w, "<h3>data Recieved Successfully</h3>")
 }
 
 
-func postRequest(text string, LangCode string) (string, error) {
-	authKey := "e5ab02b3-3e3d-bfaa-acc8-bc4f34c70884:fx"
-	link := "https://api-free.deepl.com/v2/translate"
-	targetLang := LangCode
+// func postRequest(text string, LangCode string) (string, error) {
+// 	authKey := "e5ab02b3-3e3d-bfaa-acc8-bc4f34c70884:fx"
+// 	link := "https://api-free.deepl.com/v2/translate"
+// 	targetLang := LangCode
 
-	data := url.Values{}
-	data.Set("text", text)
-	data.Set("target_lang", targetLang)
+// 	data := url.Values{}
+// 	data.Set("text", text)
+// 	data.Set("target_lang", targetLang)
 
-	req, err := http.NewRequest("POST", link, bytes.NewBufferString(data.Encode()))
-	if err != nil {
-		return "", err
-	}
+// 	req, err := http.NewRequest("POST", link, bytes.NewBufferString(data.Encode()))
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Authorization", fmt.Sprintf("DeepL-Auth-Key %s", authKey))
+// 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+// 	req.Header.Set("Authorization", fmt.Sprintf("DeepL-Auth-Key %s", authKey))
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
+// 	body, err := ioutil.ReadAll(resp.Body)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	var result map[string]interface{}
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		return "", err
-	}
-	if result["translations"] == nil {
-		return "", fmt.Errorf("no translations found")
-	}
-	translations := result["translations"].([]interface{})
-	translation := translations[0].(map[string]interface{})
-	return translation["text"].(string), nil
-}
+// 	var result map[string]interface{}
+// 	err = json.Unmarshal(body, &result)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	if result["translations"] == nil {
+// 		return "", fmt.Errorf("no translations found")
+// 	}
+// 	translations := result["translations"].([]interface{})
+// 	translation := translations[0].(map[string]interface{})
+// 	return translation["text"].(string), nil
+// }
 
 
 
-func sendEventData(Client pusher.Client, line string, line_number int) {
-	data := map[string]string{
-		"number": strconv.Itoa(line_number),
-		"line":   line,
-	}
-	err := Client.Trigger("my-channel", "my-event", data)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-}
+// func sendEventData(Client pusher.Client, line string, line_number int) {
+// 	data := map[string]string{
+// 		"number": strconv.Itoa(line_number),
+// 		"line":   line,
+// 	}
+// 	err := Client.Trigger("my-channel", "my-event", data)
+// 	if err != nil {
+// 		fmt.Println(err.Error())
+// 	}
+// }
 
 // func main() {
 // 	fmt.Println("Server Started at port 8080")
