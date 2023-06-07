@@ -26,7 +26,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodGet {
         // It's a Get request
-        w.Write([]byte("Method Not Allowed"))
+        fmt.Fprintf(w, "method not allowed")
     }
 	// Client := pusher.Client{
 	// 	AppID:   "1568045",
@@ -65,19 +65,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// for i := 0; i < len(strings.Split(codeFile, "\n"))-1; i++ {
 	// 	<-resultChan
 	// }
-	response := Response{
-		Message: "data Recieved Successfully",
-	}
+	fmt.Fprintf(w, "<h3>data Recieved Successfully</h3>")
+	// response := Response{
+	// 	Message: "data Recieved Successfully",
+	// }
 
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return 
-	}
+	// jsonResponse, err := json.Marshal(response)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return 
+	// }
 
 
 	// Write the JSON data to the response
-	w.Write(jsonResponse)
+	//w.Write(jsonResponse)
 }
 
 
