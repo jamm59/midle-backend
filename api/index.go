@@ -1,4 +1,4 @@
-package handler
+package main
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
 	pusher "github.com/pusher/pusher-http-go/v5"
 )
@@ -22,49 +21,50 @@ type Response struct {
 }
  
 func Handler(w http.ResponseWriter, r *http.Request) {
-
+	// Set the Content-Type header to application/json
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodGet {
         // It's a Get request
         w.Write([]byte("Method Not Allowed"))
-		return 
     }
-	Client := pusher.Client{
-		AppID:   "1568045",
-		Key:     "51f659ce3f43900892ff",
-		Secret:  "2693c09337092248c022",
-		Cluster: "eu",
-		Secure:  true,
-	}
-	var reqBody requestBody
-	err := json.NewDecoder(r.Body).Decode(&reqBody)
-	if err != nil {
-		// handle error
-		fmt.Println(err)
-	}
+	// Client := pusher.Client{
+	// 	AppID:   "1568045",
+	// 	Key:     "51f659ce3f43900892ff",
+	// 	Secret:  "2693c09337092248c022",
+	// 	Cluster: "eu",
+	// 	Secure:  true,
+	// }
+	// var reqBody requestBody
+	// err := json.NewDecoder(r.Body).Decode(&reqBody)
+	// if err != nil {
+	// 	// handle error
+	// 	fmt.Println(err)
+	// }
 	
-	var codeFile string = reqBody.Data
-	var langCode string = reqBody.Lang
-	resultChan := make(chan struct{})
-	for line_num, line := range strings.Split(codeFile, "\n") {
-		// if this line has fewer characters then skip it
-		if len(line) < 3 {
-			sendEventData(Client, line, line_num)
-			continue
-		}
-		// using concurrency to process each line for better performance
-		go func(line string, num int) {
-			line, err := postRequest(line, langCode)
-			if err != nil {
-				fmt.Println(err)
-			}
-			//fmt.Println(num+1, line)
-			sendEventData(Client, line, num)
-			resultChan <- struct{}{}
-		}(line, line_num)
-	}
-	for i := 0; i < len(strings.Split(codeFile, "\n"))-1; i++ {
-		<-resultChan
-	}
+	// var codeFile string = reqBody.Data
+	// var langCode string = reqBody.Lang
+	// resultChan := make(chan struct{})
+	// for line_num, line := range strings.Split(codeFile, "\n") {
+	// 	// if this line has fewer characters then skip it
+	// 	if len(line) < 3 {
+	// 		sendEventData(Client, line, line_num)
+	// 		continue
+	// 	}
+	// 	// using concurrency to process each line for better performance
+	// 	go func(line string, num int) {
+	// 		line, err := postRequest(line, langCode)
+	// 		if err != nil {
+	// 			fmt.Println(err)
+	// 		}
+	// 		//fmt.Println(num+1, line)
+	// 		sendEventData(Client, line, num)
+	// 		resultChan <- struct{}{}
+	// 	}(line, line_num)
+	// }
+	// for i := 0; i < len(strings.Split(codeFile, "\n"))-1; i++ {
+	// 	<-resultChan
+	// }
 	response := Response{
 		Message: "data Recieved Successfully",
 	}
@@ -75,8 +75,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
-	// Set the Content-Type header to application/json
-	w.Header().Set("Content-Type", "application/json")
 
 	// Write the JSON data to the response
 	w.Write(jsonResponse)
@@ -137,3 +135,12 @@ func sendEventData(Client pusher.Client, line string, line_number int) {
 		fmt.Println(err.Error())
 	}
 }
+
+// func main() {
+// 	fmt.Println("Server Started at port 8080")
+// 	router := mux.NewRouter()
+//     // Register routes
+//     router.HandleFunc("/", Handler)
+//     // Start the server
+//     http.ListenAndServe(":8080", nil)
+// }
