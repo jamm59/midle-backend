@@ -22,6 +22,12 @@ type Response struct {
 }
  
 func Handler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet {
+        // It's a Get request
+        w.Write([]byte("Method Not Allowed"))
+		return 
+    }
 	Client := pusher.Client{
 		AppID:   "1568045",
 		Key:     "51f659ce3f43900892ff",
