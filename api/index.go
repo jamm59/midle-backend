@@ -4,6 +4,18 @@ import (
 	"fmt"
 	"net/http"
 )
+ 
+func Handler(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
+}
+
+
+// package handler
+
+// import (
+// 	"fmt"
+// 	"net/http"
+// )
 
 // type requestBody struct {
 // 	Lang string `json:"lang"`
@@ -13,7 +25,7 @@ import (
 // 	Message string
 // }
  
-func Handler(w http.ResponseWriter, r *http.Request) {
+//func Handler(w http.ResponseWriter, r *http.Request) {
 	// Set the Content-Type header to application/json
 	// w.Header().Set("Content-Type", "application/json")
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -71,8 +83,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		
 		// Write the JSON data to the response
 		//w.Write(jsonResponse)
-	fmt.Fprintf(w, "<h3>data Recieved Successfully</h3>")
-}
+// 	fmt.Fprintf(w, "<h3>data Recieved Successfully</h3>")
+// }
 
 
 // func postRequest(text string, LangCode string) (string, error) {
