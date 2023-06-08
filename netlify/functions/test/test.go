@@ -9,6 +9,11 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
   return &events.APIGatewayProxyResponse{
     StatusCode:        200,
     Body:              "Hello, World!",
+    Headers: map[string]string{
+      "Access-Control-Allow-Origin":      "*",
+      "Access-Control-Allow-Credentials": "true",
+      "Content-Type":                     "application/json",
+    },
   }, nil
 }
 
