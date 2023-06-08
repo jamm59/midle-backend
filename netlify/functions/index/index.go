@@ -86,6 +86,13 @@ func sendEventData(Client pusher.Client, line string, line_number int) {
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 
+	if request.HTTPMethod != "POST" {
+		return &events.APIGatewayProxyResponse{
+			StatusCode:        400,
+			Body:              "Invalid HTTP Method",
+		}, nil
+	}
+
 	Client := pusher.Client{
 		AppID:   "1568045",
 		Key:     "51f659ce3f43900892ff",
