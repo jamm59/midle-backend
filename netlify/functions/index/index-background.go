@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -84,7 +85,7 @@ func sendEventData(Client pusher.Client, line string, line_number int) {
 
 
 
-func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 
 	if request.HTTPMethod != "POST" {
 		return &events.APIGatewayProxyResponse{
