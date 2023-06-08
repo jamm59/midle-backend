@@ -1,11 +1,10 @@
-module api
+module github.com/mobiTech1/goLang-restapi-deploy
 
 go 1.20
 
 require (
-	github.com/gorilla/mux v1.8.0
+	github.com/aws/aws-lambda-go v1.41.0
 	github.com/pusher/pusher-http-go/v5 v5.1.1
-	github.com/rs/cors v1.9.0
 )
 
 require (

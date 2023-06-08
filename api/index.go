@@ -1,20 +1,14 @@
-package handler
-
-import (
-	"fmt"
-	"net/http"
-)
- 
-func Handler(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
-}
-
-
 // package handler
 
 // import (
+// 	"bytes"
+// 	"encoding/json"
 // 	"fmt"
+// 	"io/ioutil"
 // 	"net/http"
+// 	"net/url"
+// 	"strconv"
+// 	"strings"
 // )
 
 // type requestBody struct {
@@ -24,68 +18,66 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // type Response struct {
 // 	Message string
 // }
- 
-//func Handler(w http.ResponseWriter, r *http.Request) {
-	// Set the Content-Type header to application/json
-	// w.Header().Set("Content-Type", "application/json")
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	// if r.Method == http.MethodGet {
-    //     // It's a Get request
-    //     fmt.Fprintf(w, "method not allowed")
-    // }
-	// Client := pusher.Client{
-	// 	AppID:   "1568045",
-	// 	Key:     "51f659ce3f43900892ff",
-	// 	Secret:  "2693c09337092248c022",
-	// 	Cluster: "eu",
-	// 	Secure:  true,
-	// }
-	// var reqBody requestBody
-	// err := json.NewDecoder(r.Body).Decode(&reqBody)
-	// if err != nil {
-	// 	// handle error
-	// 	fmt.Println(err)
-	// }
-	
-	// var codeFile string = reqBody.Data
-	// var langCode string = reqBody.Lang
-	// resultChan := make(chan struct{})
-	// for line_num, line := range strings.Split(codeFile, "\n") {
-	// 	// if this line has fewer characters then skip it
-	// 	if len(line) < 3 {
-	// 		sendEventData(Client, line, line_num)
-	// 		continue
-	// 	}
-	// 	// using concurrency to process each line for better performance
-	// 	go func(line string, num int) {
-	// 		line, err := postRequest(line, langCode)
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 		}
-	// 		//fmt.Println(num+1, line)
-	// 		sendEventData(Client, line, num)
-	// 		resultChan <- struct{}{}
-	// 	}(line, line_num)
-	// }
-	// for i := 0; i < len(strings.Split(codeFile, "\n"))-1; i++ {
-	// 	<-resultChan
-	// }
-	// response := Response{
-		// 	Message: "data Recieved Successfully",
-	// }
-	
-	// jsonResponse, err := json.Marshal(response)
-	// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return 
-		// }
-		
-		
-		// Write the JSON data to the response
-		//w.Write(jsonResponse)
+
+// func Handler(w http.ResponseWriter, r *http.Request) {
+// 	//Set the Content-Type header to application/json
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	if r.Method == http.MethodGet {
+//         // It's a Get request
+//         fmt.Fprintf(w, "method not allowed")
+//     }
+// 	Client := pusher.Client{
+// 		AppID:   "1568045",
+// 		Key:     "51f659ce3f43900892ff",
+// 		Secret:  "2693c09337092248c022",
+// 		Cluster: "eu",
+// 		Secure:  true,
+// 	}
+// 	var reqBody requestBody
+// 	err := json.NewDecoder(r.Body).Decode(&reqBody)
+// 	if err != nil {
+// 		// handle error
+// 		fmt.Println(err)
+// 	}
+
+// 	var codeFile string = reqBody.Data
+// 	var langCode string = reqBody.Lang
+// 	resultChan := make(chan struct{})
+// 	for line_num, line := range strings.Split(codeFile, "\n") {
+// 		// if this line has fewer characters then skip it
+// 		if len(line) < 3 {
+// 			sendEventData(Client, line, line_num)
+// 			continue
+// 		}
+// 		// using concurrency to process each line for better performance
+// 		go func(line string, num int) {
+// 			line, err := postRequest(line, langCode)
+// 			if err != nil {
+// 				fmt.Println(err)
+// 			}
+// 			//fmt.Println(num+1, line)
+// 			sendEventData(Client, line, num)
+// 			resultChan <- struct{}{}
+// 		}(line, line_num)
+// 	}
+// 	for i := 0; i < len(strings.Split(codeFile, "\n"))-1; i++ {
+// 		<-resultChan
+// 	}
+// 	response := Response{
+// 			Message: "data Recieved Successfully",
+// 	}
+
+// 	jsonResponse, err := json.Marshal(response)
+// 	if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		//Write the JSON data to the response
+// 		w.Write(jsonResponse)
 // 	fmt.Fprintf(w, "<h3>data Recieved Successfully</h3>")
 // }
-
 
 // func postRequest(text string, LangCode string) (string, error) {
 // 	authKey := "e5ab02b3-3e3d-bfaa-acc8-bc4f34c70884:fx"
@@ -129,8 +121,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // 	return translation["text"].(string), nil
 // }
 
-
-
 // func sendEventData(Client pusher.Client, line string, line_number int) {
 // 	data := map[string]string{
 // 		"number": strconv.Itoa(line_number),
@@ -150,3 +140,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 //     // Start the server
 //     http.ListenAndServe(":8080", nil)
 // }
+
+package main
