@@ -9,11 +9,15 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
+	"unicode"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/bzick/tokenizer"
 	pusher "github.com/pusher/pusher-http-go/v5"
 )
+
 
 func main() {
   lambda.Start(handler)
@@ -23,6 +27,7 @@ type requestBody struct {
 	Lang string `json:"lang"`
 	Data string `json:"data"`
 }
+
 type Response struct {
 	Message string
 }
@@ -30,11 +35,10 @@ type Response struct {
 func postRequest(text string, LangCode string) (string, error) {
 	authKey := "e5ab02b3-3e3d-bfaa-acc8-bc4f34c70884:fx"
 	link := "https://api-free.deepl.com/v2/translate"
-	targetLang := LangCode
 
 	data := url.Values{}
 	data.Set("text", text)
-	data.Set("target_lang", targetLang)
+	data.Set("target_lang", LangCode)
 
 	req, err := http.NewRequest("POST", link, bytes.NewBufferString(data.Encode()))
 	if err != nil {
@@ -69,8 +73,6 @@ func postRequest(text string, LangCode string) (string, error) {
 	return translation["text"].(string), nil
 }
 
-
-
 func sendEventData(Client pusher.Client, line string, line_number int) {
 	data := map[string]string{
 		"number": strconv.Itoa(line_number),
@@ -81,8 +83,6 @@ func sendEventData(Client pusher.Client, line string, line_number int) {
 		fmt.Println(err.Error())
 	}
 }
-
-
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 
@@ -118,11 +118,12 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}
 		// using concurrency to process each line for better performance
 		go func(line string, num int) {
-			line, err := postRequest(line, langCode)
-			if err != nil {
-				fmt.Println(err)
-			}
-			//fmt.Println(num+1, line)
+			tokenizer := tokenizer.New()
+			stream := tokenizer.ParseString(line)
+			defer stream.Close()
+			// get Stream Translations returns a slice of translated strings
+			tokens := getStreamTranslations(stream, langCode)
+			line = strings.Join(tokens, " ")
 			sendEventData(Client, line, num)
 			resultChan <- struct{}{}
 		}(line, line_num)
@@ -146,7 +147,75 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
   }, nil
 }
 
+func getStreamTranslations(stream *tokenizer.Stream, langCode string)[]string {
+	length := 0
+	tokens := make([]string, int(stream.GetParsedLength() / 2))
+	var waitGroup sync.WaitGroup
+	for stream.IsValid() {
+		currentString := stream.CurrentToken().ValueString()
+		waitGroup.Add(1)
+		go func(tokens []string, length int) {
+			defer waitGroup.Done()
+			translation, err := postRequest(convertToSentence(currentString), langCode)
+			if err != nil {
+				fmt.Println(err)
+			}
+			translation = eliminateSpaces(translation)
+			tokens[length] = translation
+			//fmt.Println(translation)
+			}(tokens, length)
+		stream.GoNext()
+		length++
+	}
+	waitGroup.Wait()
+	return tokens
+}
 
+func convertToSentence(input string) string {
+	var words []string
 
+	// Check if the input is in camel case or snake case
+	if strings.Contains(input, "_") {
+		words = strings.Split(input, "_")
+	} else {
+		// Convert camel case to separate words
+		words = splitCamelCase(input)
+	}
 
+	// Capitalize the first word
+	words[0] = strings.Title(words[0])
+
+	// Join the words to form a sentence
+	sentence := strings.Join(words, " ")
+
+	return sentence
+}
+
+func splitCamelCase(input string) []string {
+	var words []string
+
+	// Split the camel case by identifying capital letters
+	var currentWord []rune
+	for _, char := range input {
+		if unicode.IsUpper(char) {
+			if len(currentWord) > 0 {
+				words = append(words, string(currentWord))
+			}
+			currentWord = []rune{char}
+		} else {
+			currentWord = append(currentWord, char)
+		}
+	}
+
+	// Append the last word
+	if len(currentWord) > 0 {
+		words = append(words, string(currentWord))
+	}
+
+	return words
+}
+
+func eliminateSpaces(input string) string {
+	return strings.Replace(input, " ", "", -1)
+}
 

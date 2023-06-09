@@ -1,0 +1,158 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strings"
+	"sync"
+	"unicode"
+
+	"github.com/bzick/tokenizer"
+)
+
+func main() {
+	// count := 0
+	// for {
+	// 	if count == 5 {
+	// 		break
+	// 	}
+	// 	tokenizer := tokenizer.New()
+	// 	stream := tokenizer.ParseString("fmt.Println(tokenizer.ParseString(''))")
+	// 	defer stream.Close()
+	// 	tokens := getStreamTranslations(stream)
+	// 	fmt.Println(tokens)
+	// 	count++
+	// }
+	var wg sync.WaitGroup
+
+	var result string
+  
+	for i := 0; i < 5; i++ {
+	  wg.Add(1)
+	  go func(result *string) {
+		defer wg.Done()
+		*result += "Hello, World! " 
+	  }( &result )
+  
+	}
+	wg.Wait()
+	fmt.Println(result)
+}
+
+
+func getStreamTranslations(stream *tokenizer.Stream)[]string {
+	length := 0
+	tokens := make([]string, int(stream.GetParsedLength() / 2))
+	var waitGroup sync.WaitGroup
+	for stream.IsValid() {
+		currentString := stream.CurrentToken().ValueString()
+		waitGroup.Add(1)
+		go func(tokens []string, length int) {
+			defer waitGroup.Done()
+			translation, err := postRequest(convertToSentence(currentString), "es")
+			if err != nil {
+				fmt.Println(err)
+			}
+			translation = eliminateSpaces(translation)
+			tokens[length] = translation
+			//fmt.Println(translation)
+			}(tokens, length)
+		stream.GoNext()
+		length++
+	}
+	waitGroup.Wait()
+	return tokens
+}
+
+func convertToSentence(input string) string {
+	var words []string
+
+	// Check if the input is in camel case or snake case
+	if strings.Contains(input, "_") {
+		words = strings.Split(input, "_")
+	} else {
+		// Convert camel case to separate words
+		words = splitCamelCase(input)
+	}
+
+	// Capitalize the first word
+	words[0] = strings.Title(words[0])
+
+	// Join the words to form a sentence
+	sentence := strings.Join(words, " ")
+
+	return sentence
+}
+
+func splitCamelCase(input string) []string {
+	var words []string
+
+	// Split the camel case by identifying capital letters
+	var currentWord []rune
+	for _, char := range input {
+		if unicode.IsUpper(char) {
+			if len(currentWord) > 0 {
+				words = append(words, string(currentWord))
+			}
+			currentWord = []rune{char}
+		} else {
+			currentWord = append(currentWord, char)
+		}
+	}
+
+	// Append the last word
+	if len(currentWord) > 0 {
+		words = append(words, string(currentWord))
+	}
+
+	return words
+}
+
+func eliminateSpaces(input string) string {
+	return strings.Replace(input, " ", "", -1)
+}
+
+func postRequest(text string, LangCode string) (string, error) {
+	authKey := "e5ab02b3-3e3d-bfaa-acc8-bc4f34c70884:fx"
+	link := "https://api-free.deepl.com/v2/translate"
+
+	data := url.Values{}
+	data.Set("text", text)
+	data.Set("target_lang", LangCode)
+
+	req, err := http.NewRequest("POST", link, bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("DeepL-Auth-Key %s", authKey))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return "", err
+	}
+	if result["translations"] == nil {
+		return "", fmt.Errorf("no translations found")
+	}
+	translations := result["translations"].([]interface{})
+	translation := translations[0].(map[string]interface{})
+	return translation["text"].(string), nil
+}

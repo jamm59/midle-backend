@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
+	github.com/bzick/tokenizer v1.3.0
 	github.com/pusher/pusher-http-go/v5 v5.1.1
 )
 
